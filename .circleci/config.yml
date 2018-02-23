@@ -1,0 +1,36 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/postal-code-api
+    docker:
+      - image: nguyenhuedang/skynet
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: |
+            yarn run build
+            cp example/index.html api/index.html
+      - run:
+          name: Deploy
+          command: |
+            aws s3 sync ./api s3://postal-code-api --delete
+            aws cloudfront create-invalidation --distribution-id E2DUSRQH2EPRYH --paths "/*"
+    filters:
+      branches:
+        only: master
+
+workflows:
+  version: 2
+  commit-workflow:
+    jobs:
+      - build
+  scheduled-workflow:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only: master
+    jobs:
+      - build
