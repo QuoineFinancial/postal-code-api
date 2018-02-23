@@ -7,6 +7,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install
+          command: yarn
+      - run:
           name: Build
           command: |
             yarn run build
